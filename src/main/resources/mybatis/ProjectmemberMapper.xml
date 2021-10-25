@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.ProjectmemberMapper">
+
+    <!--해당 프로젝트의 닉네임과 사진 변경-->
+    <update id="updateProfile" parameterType="projectmemberDTO">
+        UPDATE project_member
+        SET projmember_name = #{projmember_name},
+            projmember_filename = #{projmember_filename},
+            projmember_filetype = #{projmember_filetype},
+            projmember_data = #{projmember_data}
+        WHERE projmember_seq = #{projmember_seq}
+    </update>
+
+    <!--해당 프로젝트의 닉네임과 사진 변경-->
+    <update id="updatePicture" parameterType="projectmemberDTO">
+        UPDATE project_member
+        SET projmember_filename = #{projmember_filename},
+            projmember_filetype = #{projmember_filetype},
+            projmember_data = #{projmember_data}
+        WHERE projmember_seq = #{projmember_seq}
+    </update>
+
+    <!--해당 프로젝트의 닉네임만 변경-->
+    <update id="updateName" parameterType="java.util.HashMap">
+        UPDATE project_member SET projmember_name = #{projmember_name} WHERE projmember_seq = #{projmember_seq}
+    </update>
+
+    <!--프로젝트seq와(프론트에서 넘겨줌) 멤버seq(세션으로 받음)로 프로젝트멤버 seq 찾기-->
+    <select id="findProjMemberSeq" parameterType="long" resultType="long">
+        SELECT projmember_seq FROM project_member
+        WHERE project_seq=#{project_seq} AND member_seq=#{member_seq};
+    </select>
+
+    <!--이미지 꺼내봐요-->
+    <select id="showImage" parameterType="long" resultType="projectmemberDTO">
+        select * from project_member where projmember_seq=#{projmember_seq};
+    </select>
+
+    <!-- 프로젝트 관리자 권한 주기 -->
+    <update id="masterget" parameterType="long">
+        update project_member
+        set projmember_type = "0"
+        where projmember_seq = #{projmember_seq} and project_seq = #{project_seq}
+    </update>
+
+    <!-- 관리자 권한 상실 -->
+    <update id="excludMaster" parameterType="long">
+        update project_member
+        set projmember_type="1"
+        where projmember_seq= #{projmember_seq} and project_seq = #{project_seq}
+    </update>
+
+
+
+    <!-- 프로젝트 강퇴 -->
+    <delete id="projectout" parameterType="long">
+        DELETE from project_member
+        where project_seq= #{project_seq} And projmember_seq= #{projmember_seq}
+    </delete>
+
+    <!-- 프로젝트 나가기 -->
+    <delete id="projectexit" parameterType="long">
+        Delete from Project_member
+        where project_seq= #{project_seq} And projmember_seq= #{projmember_seq}
+    </delete>
+
+
+
+
+
+
+
+
+
+
+    <!--    가은 추가-->
+    <!--   해당 프로젝트의 멤버 찾기-->
+    <select id="allProjMembers" parameterType="long" resultType="projectmemberDTO">
+        SELECT a.member_email, a.member_seq, b.projmember_seq, b.projmember_name, b.projmember_type, b.projmember_data
+        FROM member AS a LEFT JOIN project_member AS b ON a.member_seq = b.member_seq WHERE project_seq=#{project_seq};
+    </select>
+
+<!--    해당 프로젝트에 초대하여 멤버 type으로 추가하기-->
+    <insert id="insertMember" parameterType="long">
+        INSERT INTO project_member (projmember_type, project_seq, member_seq)
+        VALUES("1",#{project_seq},#{member_seq})
+    </insert>
+
+
+    <!--memberSeq 찾기-->
+    <select id="findProjMember" parameterType="long" resultType="projectmemberDTO">
+        select * from project_member where member_seq=#{member_seq} and project_seq=#{project_seq}
+    </select>
+
+
+<select id="allProMemberSeq" parameterType="long" resultType="projectmemberDTO">
+    select projmember_seq
+    from project_member
+    where project_seq = #{project_seq}
+</select>
+
+
+</mapper>

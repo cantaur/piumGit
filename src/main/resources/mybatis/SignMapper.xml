@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.SignMapper">
+
+    <insert id="signup" parameterType="SignDTO">
+            insert into member(member_email, member_pw, member_platform) values(#{member_email}, #{member_pw}, #{member_platform});
+    </insert>
+
+    <insert id="userRoleSave" parameterType="int">
+        INSERT INTO member_auth(member_seq,authorities_no) VALUES(#{member_seq},#{authorities_no})
+    </insert>
+
+<!--    authkey 업데이트-->
+    <update id="authkeySave" parameterType="String">
+        update member set authKey=#{authKey} where member_email=#{member_email}
+    </update>
+
+
+
+    <select id="findByUserId" resultType="SignDTO" parameterType="String">
+        SELECT
+            m.member_seq AS member_seq,
+            m.member_pw AS member_pw,
+            m.member_email AS member_email,
+            m.member_platform AS member_platform,
+            a.authorities_name AS authorities_name
+        FROM member AS m
+                 INNER JOIN member_auth AS ma
+                            ON m.member_seq = ma.member_seq
+                 INNER JOIN authorities AS a
+                            ON a.authorities_no = ma.authorities_no
+        WHERE
+            m.member_email = #{member_email}
+    </select>
+
+    <select id="findUserNo" resultType="Integer" parameterType="String">
+        SELECT member_seq FROM member WHERE member_email = #{member_email}
+    </select>
+
+    <select id="findRoleNo" resultType="Integer" parameterType="String">
+        SELECT authorities_no FROM authorities WHERE authorities_name = #{authorities_name}
+    </select>
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.TaskmemberMapper">
+
+    <!--  마지막으로 입력된 taskmember seq 검색-->
+    <select id="lastTaskSeq" resultType="long">
+        SELECT MAX( task_seq ) FROM task;
+
+    </select>
+
+    <!--  업무번호로 조회 -->
+    <select id="selectByTaskSeq" resultType="TaskmemberDTO" parameterType="long">
+        select * from task_member where task_seq = #{task_seq}
+    </select>
+
+
+
+</mapper>

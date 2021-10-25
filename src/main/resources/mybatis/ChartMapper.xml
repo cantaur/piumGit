@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.ChartMapper">
+    <!-- chart 1 -->
+    <select id="countMilestoneStatusZero" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM milestone WHERE project_seq=#{project_seq} AND milestone_status='0' AND milestone_isdelete='0'
+    </select>
+    <select id="countMilestoneStatusOne" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM milestone WHERE project_seq=#{project_seq} AND milestone_status='1' AND milestone_isdelete='0'
+    </select>
+    <!-- chart 2 -->
+    <select id="countTaskAll" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM task WHERE project_seq=#{project_seq} AND task_isdelete='0';
+    </select>
+    <select id="countTaskMine" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM task, member WHERE project_seq=#{project_seq} AND projmember_seq=#{projmember_seq} AND member_seq=#{member_seq} AND task_isdelete='0';
+    </select>
+    <!-- chart 3 -->
+    <select id="countTaskStatusZero" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM task WHERE project_seq=#{project_seq} AND task_status='0' AND task_isdelete='0';
+    </select>
+    <select id="countTaskStatusOne" resultType="long" parameterType="long">
+        SELECT COUNT(*) FROM task WHERE project_seq=#{project_seq} AND task_status='1' AND task_isdelete='0';
+    </select>
+    <!-- chart 4 -->
+    <resultMap id="countMyAllTaskMap" type="TaskmemberDTO">
+        <id column="taskmember_seq" property="taskmember_seq"/>
+        <result column="total" property="total"/>
+        <result column="done" property="done"/>
+    </resultMap>
+    <!-- 프로젝트 멤버 한명의 전체 업무 및 종료된 업무-->
+    <select id="countMyAllTask" resultType="TaskmemberDTO" parameterType="long" resultMap="countMyAllTaskMap">
+        SELECT COUNT(t.task_status) total, COUNT(case when t.task_status=1 then 1 END) done, tm.projmember_seq, project_seq
+        FROM task_member AS tm
+        JOIN task AS t ON t.task_seq = tm.task_seq
+        WHERE project_seq = #{project_seq} AND t.task_isdelete = 0  GROUP BY tm.projmember_seq;
+    </select>
+
+    <!-- 타임라인 -->
+    <select id="timelineMile" resultType="Map" parameterType="long">
+        SELECT milestone_seq, milestone_title, milestone_content, milestone_status,
+               milestone_startdate, milestone_duedate
+        FROM milestone 
+        WHERE project_seq = #{project_seq} AND milestone_isdelete = 0
+        ORDER BY milestone_seq asc
+    </select>
+
+    <select id="timelineTask" resultType="Map" parameterType="long">
+        SELECT task_seq, task_title, task_content, task_startdate,
+               task_duedate, task_status, milestone_seq
+        FROM task WHERE project_seq = #{project_seq} AND task_isdelete = "0"
+        ORDER BY milestone_seq ASC
+    </select>
+
+</mapper>

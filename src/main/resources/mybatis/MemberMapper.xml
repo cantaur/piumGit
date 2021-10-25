@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.MemberMapper">
+
+    <select id="findUserEmail" resultType="String" parameterType="String">
+        select member_email from member where member_email=#{member_email}
+    </select>
+
+    <select id="selectAllByEmail" resultType="MemberDTO" parameterType="String">
+        select * from member where member_email=#{member_email}
+    </select>
+
+    <select id="findUserNo" resultType="long" parameterType="String">
+        SELECT member_seq FROM member WHERE member_email = #{member_email}
+    </select>
+
+    <select id="chkUser" resultType="String" parameterType="String">
+        SELECT member_seq FROM member WHERE member_email = #{member_email}
+    </select>
+
+
+
+
+</mapper>

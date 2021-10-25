@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.WorklabelMapper">
+
+    <select id="findLabelTitle" resultType="LabelDTO" parameterType="long">
+        select label_title from work_label where label_seq = #{label_seq}
+    </select>
+
+    <select id="chkLabel" resultType="String" parameterType="String">
+        select * from work_label where label_title=#{label_title}
+    </select>
+
+    <select id="findLabelSeq" resultType="Long" parameterType="String">
+        select label_Seq from work_label where label_title=#{label_title}
+    </select>
+
+    <insert id="insertLabel" parameterType="LabelDTO">
+        insert into work_label(label_title) values(#{label_title})
+    </insert>
+
+    <!--  마지막으로 입력된 라벨 seq 검색-->
+    <select id="lastLabelSeq" resultType="long">
+        SELECT MAX( label_seq ) FROM work_label;
+
+    </select>
+
+
+
+</mapper>

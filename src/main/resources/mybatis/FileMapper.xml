@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.FileMapper">
+    <insert id="saveFile" parameterType="FileDTO">
+        INSERT INTO file (file_savename,file_originname,file_uploaddate,file_size,file_type,projmember_seq,task_seq,project_seq)
+        VALUES(#{file_savename},#{file_originname},now(),#{file_size},#{file_type},#{projmember_seq},#{task_seq},#{project_seq})
+    </insert>
+
+    <select id="findById" parameterType="long" resultType="FileDTO">
+        select * from file where file_seq=#{file_seq}
+    </select>
+
+    <select id="findFileByTaskseq" parameterType="long" resultType="FileDTO">
+        select * from file where task_seq=#{task_seq}
+    </select>
+
+    <select id="findFileByProjseq" parameterType="long" resultType="Map">
+        SELECT f.*, t.milestone_seq,t.task_title FROM file AS f LEFT JOIN task as t ON f.task_seq = t.task_seq
+        WHERE f.project_seq = #{project_seq} order BY f.file_seq DESC
+    </select>
+
+    <!--  마지막으로 입력된 파일 seq 검색-->
+    <select id="lastFileSeq" parameterType="long" resultType="long">
+        SELECT MAX( file_seq ) FROM file where task_seq=#{task_seq};
+
+    </select>
+
+
+
+
+</mapper>

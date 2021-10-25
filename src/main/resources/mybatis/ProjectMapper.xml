@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.ProjectMapper">
+
+    <!--로그인한 유저가 참여중인 프로젝트 리스트-->
+    <select id="myProject" resultType="ProjectDTO" parameterType="long">
+        select * from project where project_seq in(SELECT project_seq FROM project_member where member_seq = #{member_seq})
+    </select>
+    
+    <!--로그인한 유저가 참여중인 프로젝트 리스트+프로젝트 멤버 타입 join 결과-->
+    <select id="myProjectJoin" resultType="ProjectDTO" parameterType="long">
+        SELECT DISTINCT a.*, b.projmember_seq, b.projmember_type
+        FROM project AS a left JOIN project_member AS b ON a.project_seq = b.project_seq
+        WHERE b.member_seq = #{member_seq}
+    </select>
+
+    <!--프로젝트 생성-->
+    <insert id="insertProject" parameterType="ProjectDTO">
+        INSERT INTO project (project_title, project_content, project_startdate, project_duedate, member_seq)
+        VALUES(#{project_title},#{project_content},#{project_startdate},#{project_duedate},#{member_seq})
+    </insert>
+
+
+<!-- 프로젝트 생성 시 프로젝트 멤버 테이블에 관리자셋팅-->
+    <insert id="insertManager" parameterType="long">
+        INSERT INTO project_member (projmember_type, project_seq, member_seq)
+        VALUES("0",#{project_seq},#{member_seq})
+
+    </insert>
+
+<!--  마지막으로 입력된 프로젝트 seq 검색-->
+    <select id="findSeq" resultType="long">
+        select last_insert_id();
+
+    </select>
+
+
+<!--프로젝트를 완료상태로 전환-->
+    <update id="closeProject" parameterType="long">
+        UPDATE project
+        SET project_status = "1"
+        WHERE project_seq = #{project_seq}
+    </update>
+
+    <!--프로젝트를 진행상태로 전환-->
+    <update id="openProject" parameterType="long">
+        UPDATE project
+        SET project_status = "0"
+        WHERE project_seq = #{project_seq}
+    </update>
+
+    <!--프로젝트 삭제상태 업데이트(isdelete=1)-->
+    <update id="updateIsdelete" parameterType="ProjectDTO">
+        UPDATE project
+        SET project_isdelete = "1"
+        WHERE project_seq = #{project_seq}
+    </update>
+
+
+    <!--프로젝트 전체 업데이트(enddate제외)-->
+    <update id="updateProject" parameterType="ProjectDTO">
+        UPDATE project
+        SET project_title = #{project_title},
+            project_content = #{project_content},
+            project_startdate = #{project_startdate},
+            project_duedate = #{project_duedate}
+        WHERE project_seq = #{project_seq}
+    </update>
+
+
+</mapper>

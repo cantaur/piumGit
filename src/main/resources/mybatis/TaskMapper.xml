@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.pium.mapper.TaskMapper">
+
+
+    <!--새 업무 셋팅-->
+    <insert id="createTask" parameterType="TaskDTO">
+        insert into task(task_title, task_content, task_startdate, task_duedate, task_date, projmember_seq, milestone_seq, project_seq)
+        values(#{task_title}, #{task_content}, #{task_startdate}, ADDTIME(#{task_duedate},'0 1:1:1.000002'), now(), #{projmember_seq}, #{milestone_seq}, #{project_seq})
+    </insert>
+    <!--해당 프로젝트에서 생성된 업무 리스트-->
+    <select id="taskList" parameterType="long" resultType="TaskDTO">
+        SELECT t.*, wl.label_title FROM task AS t LEFT JOIN work_label as wl ON t.label_seq = wl.label_seq
+        WHERE t.project_seq = #{project_seq} order by task_seq DESC
+    </select>
+
+
+    <!--    해당 마일스톤에서 생성된 업무 갯수-->
+    <select id="countTask" parameterType="long" resultType="int">
+        SELECT COUNT(task_seq) FROM task WHERE milestone_seq = #{milestone_seq}  AND task_isdelete = 0
+    </select>
+
+    <!--    해당 마일스톤에서 완료된 업무의 갯수-->
+    <select id="countClosedTask" parameterType="long" resultType="int">
+        SELECT COUNT(task_status) FROM task WHERE milestone_seq = #{milestone_seq} AND task_status = 1 AND task_isdelete = 0
+    </select>
+
+    <!-- 해당 마일스톤에서 생성된 전체 업무리스트 -->
+    <select id="taskListByMile" parameterType="long" resultType="TaskDTO">
+        SELECT t.*, wl.label_title FROM task AS t LEFT JOIN work_label as wl ON t.label_seq = wl.label_seq
+        WHERE t.milestone_seq = #{milestone_seq} order by task_seq DESC
+    </select>
+
+    <!-- 해당 마일스톤에서 생성된 업무리스트 중 진행중 상태인거   -->
+    <select id="openTaskListByMile" parameterType="long" resultType="TaskDTO">
+        SELECT t.*, wl.label_title FROM task AS t LEFT JOIN work_label as wl ON t.label_seq = wl.label_seq
+        WHERE t.milestone_seq = #{milestone_seq} and task_status='0' order by task_seq DESC
+    </select>
+
+    <!-- 해당 마일스톤에서 생성된 업무리스트 중 마감된 상태인거   -->
+    <select id="closedTaskListByMile" parameterType="long" resultType="TaskDTO">
+        SELECT t.*, wl.label_title FROM task AS t LEFT JOIN work_label as wl ON t.label_seq = wl.label_seq
+        WHERE t.milestone_seq = #{milestone_seq} and task_status='1' order by task_seq DESC
+    </select>
+
+
+
+
+
+
+
+    <!-- 업무를 클릭하였을 때 업무 상세보기 -->
+    <select id="showTaskByTaskseq" parameterType="long" resultType="TaskDTO">
+        SELECT t.*, wl.label_title FROM task AS t LEFT JOIN work_label as wl ON t.label_seq = wl.label_seq
+        WHERE t.task_seq = #{task_seq}
+    </select>
+
+<!--title update -->
+    <update id="updateTitle" parameterType="TaskDTO">
+        UPDATE task SET task_title=#{task_title} WHERE task_seq=#{task_seq}
+    </update>
+<!--content update -->
+    <update id="updateContent" parameterType="TaskDTO">
+        UPDATE task SET task_content=#{task_content} WHERE task_seq=#{task_seq}
+    </update>
+<!--마일스톤 변경하기-->
+    <update id="updateMilestone" parameterType="TaskDTO">
+        UPDATE task Set milestone_seq=#{milestone_seq} Where task_seq=#{task_seq}
+    </update>
+    <!--마일스톤 빼기-->
+    <update id="deleteMilestone" parameterType="TaskDTO">
+        UPDATE task Set milestone_seq=null Where task_seq=#{task_seq}
+    </update>
+    <!--마일스톤 date들 null로 셋팅 -->
+    <update id="setTaskDateEmpty" parameterType="long">
+        update task set task_startdate=null, task_duedate=null where task_seq=#{task_seq}
+    </update>
+    <!-- 날짜 업데이트 -->
+    <update id="updateDate" parameterType="TaskDTO">
+        UPDATE task SET task_startdate=#{task_startdate}, task_duedate = ADDTIME(#{task_duedate},'0 1:1:1.000002')
+        where task_seq=#{task_seq}
+    </update>
+    <!-- task_member에 추가하기 -->
+    <insert id="updateTaskMember" parameterType="TaskmemberDTO">
+        insert into task_member(task_seq, projmember_seq) values(#{task_seq}, #{projmember_seq})
+    </insert>
+<!-- 업무 중요도 셋팅하기 -->
+    <update id="updatePriority" parameterType="TaskDTO">
+        UPDATE task SET priority_code=#{priority_code} WHERE task_seq=#{task_seq}
+    </update>
+<!-- 업무 라벨 셋팅하기   -->
+    <update id="updateLabel" parameterType="TaskDTO">
+        UPDATE task SET label_seq=#{label_seq} WHERE task_seq=#{task_seq}
+    </update>
+
+
+
+
+
+
+
+
+
+
+
+    <!--업무상태 마감으로 변경-->
+    <update id="updateStatusFinish" parameterType="long">
+        UPDATE task Set task_status='1' Where task_seq=#{task_seq}
+    </update>
+    <!-- 업무상태 다시 활성화 시키기 -->
+    <update id="updateStatusDefault" parameterType="long">
+        UPDATE task Set task_status='0' Where task_seq=#{task_seq}
+    </update>
+    <!-- 업무상태 종료로 변경 -->
+    <update id="updateIsdelete" parameterType="long">
+        UPDATE task SET task_isdelete='1' WHERE task_seq=#{task_seq}
+    </update>
+
+
+
+
+
+    <!-- 삭제 -->
+    <delete id="deleteTaskmem" parameterType="long">
+        delete from task_member where task_seq = #{task_seq} and projmember_seq = #{projmember_seq}
+    </delete>
+
+    <!-- 최신 task seq -->
+    <select id="lasttaskSeq" parameterType="long" resultType="long">
+        SELECT MAX( task_seq ) FROM task where project_seq=#{project_seq};
+
+    </select>
+
+<!--    task_seq로 제목 뽑기-->
+    <select id="findTaskTitle" parameterType="long" resultType="string">
+        select task_title from task where task_seq = #{task_seq}
+    </select>
+
+
+
+</mapper>
